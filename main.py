@@ -4,6 +4,7 @@ This file is the main file for the text compressor
 from tree import Node, HuffmanTree
 from math import ceil
 import codecs
+import struct
 
 def open_file(file:str)-> dict():
     """
@@ -59,15 +60,46 @@ def encode(file:str):
 
                 string += sequence_bits
 
-            with open("output.txt", "wb") as o:
-                o.write(int(string[::-1], 2).to_bytes(ceil(len(string) / 8), "little"))
+            with open("output.bnr", "wb") as o:
+                o.write(int(string[::-1], 2).to_bytes(ceil(len(string) / 8), 'little'))
+                #o.write(bytes(string[::-1].encode()))
+    return lst
 
+def decode(file: str, key: list):
+    #Creates the tree to decode the text
+    tree = HuffmanTree(1)
+    tree.add(key)
+
+    # Opens the file to decode the text
+    with open(file, "rb") as f:
+
+
+        lines = f.readlines()
+
+        # Iterates the throuh the file to get the bytes
+        line_so_far = ""
+        string_so_far = ""
+        with open("outputtext.txt", "w") as o:
+            for line in lines:
+
+                # Turns the byte into a string of either 0 or 1
+                x = format(int.from_bytes(line, 'little'), '023b')[::-1]
+                line = str(x)
+
+                # iterates though every single one or zero
+                for charater in line:
+                    string_so_far = string_so_far + charater
+                    char = tree.find_character(string_so_far)
+
+                    # if the char is found then it resets the string to find the next character
+                    if char is not None:
+
+                        line_so_far = line_so_far + string_so_far
+                        string_so_far = ""
+                        o.write(char)
 
 
 if __name__ == '__main__':
     # Reads the file and returns a dictionary with all of the letters and their frequencies
-    encode("test.txt")
-
-
-
-
+    key = encode("test.txt")
+    decode("output.bnr", key)
