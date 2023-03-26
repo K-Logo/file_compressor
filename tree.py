@@ -97,7 +97,6 @@ class HuffmanTree:
         ...     lst_2.append(x)
         >>> lst_2
         ['0011', '0010', '1', '01', '000']
-
         """
         if self._left is None and self._right is None:
             if self._root.character == char:
