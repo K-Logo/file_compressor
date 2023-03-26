@@ -24,7 +24,8 @@ class Node:
             return bits
         else:
             return ""
-
+    def find_character(self, bit: str) -> str:
+        return self.character
 
 class HuffmanTree:
     "Contains the code for the huffman tree"
@@ -105,6 +106,28 @@ class HuffmanTree:
                 return ""
         else:
             return self._left.find_huffman_value(char, bits + "0") + self._right.find_huffman_value(char, bits + "1")
+
+
+    def find_character(self, bits: str) -> Optional[str]:
+        """
+        >>> tree = HuffmanTree(1)
+        >>> tree.add([Node("c", 1), Node("a", 2),Node("b", 8),Node("d", 6),Node("g", 5),])
+        >>> tree.find_character(bits="0011")
+
+        :param bits:
+        :return:
+        """
+        if self._left is None and self._right is None:
+            return self._root.character
+        elif len(bits) == 0:
+            return None
+        elif bits[0] == '1':
+            bits = bits[1:]
+            return self._right.find_character(bits)
+        elif bits[0] == "0":
+            bits = bits[1:]
+            return self._left.find_character(bits)
+
 
 def get_min(lst: list[tuple]) -> tuple:
     min_so_far = lst[0]
