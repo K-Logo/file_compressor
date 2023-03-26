@@ -6,9 +6,10 @@ from tkinter import filedialog
 import igraph as ig
 from igraph import Graph, EdgeSeq
 import plotly.graph_objects as go
+from tree import HuffmanTree, Node
 
 
-nr_vertices = 25
+nr_vertices = 14
 v_label = list(map(str, range(nr_vertices)))
 G = Graph.Tree(nr_vertices, 2) # 2 stands for children number
 lay = G.layout('rt')
@@ -52,11 +53,66 @@ fig.add_trace(go.Scatter(x=Xn,
                   opacity=0.8
                   ))
 
-def tree_visualization(frequency: dict[str, tuple[str]]) -> None:
+axis = dict(showline=False, # hide axis line, grid, ticklabels and  title
+            zeroline=False,
+            showgrid=False,
+            showticklabels=False,
+            )
+
+fig.write_image('graph.png')
+
+def tree_visualization(tree: HuffmanTree) -> None:
     """
     This is the function that allows us to visualize a tree given the dict of
     the frequency of the characters
     """
-    tree = Graph.Tree(len(frequency), 2)
-    lay = tree.layot('rt')
+    # display_tree = Graph.Tree()
+    # lay = tree.layot('rt')
+
+    # Given the huffman tree, keep track of the verticies and the edges
+    # and use that to create the graph
+    verticies = []
+    edges = []
+    get_edges_and_verticies(tree, verticies, edges)
+
+    graph = Graph.DictList(verticies, edges)
+
+    layout = graph.layout_reingold_tilford
+
+    ig.plot(graph, layout)
+
+
+
+def get_edges_and_verticies(tree: HuffmanTree, final_verticies = [], final_edges = []) -> None:
+    """
+    Recursively mutate final_verticies and final_edges 
+    """
+
+    if tree._root is None:
+        pass
+
+    else:
+        instant_vertices_dict = {}
+        instant_vertices_dict['frequency'] = tree._root.frequency
+        if tree._root.character is not None:
+            instant_vertices_dict['character'] = tree._root.character
+        else:
+            instant_vertices_dict['character'] = ''
+
+        final_verticies.append(instant_vertices_dict)
+        
+        instant_edges_dict = {}
+        if tree._right is not None:
+            instant_edges_dict['source'] = tree._root.frequency
+            instant_edges_dict['target'] = tree._right._root.frequency
+            instant_edges_dict['bit'] = 1
+            final_edges.append(instant_edges_dict)
+            get_edges_and_verticies(tree._right, final_verticies, final_edges)
+        elif tree._left is not None:
+            instant_edges_dict['source'] = tree._root.frequency
+            instant_edges_dict['target'] = tree._left._root.frequency
+            instant_edges_dict['bit'] = 0
+            final_edges.append(instant_edges_dict)
+            get_edges_and_verticies(tree._left, final_verticies, final_edges)
+
 

@@ -3,6 +3,7 @@ from typing import Any
 from tkinter import *
 from tkinter import ttk
 from tkinter import filedialog
+import tree_visualization
 
 root = Tk()
 root.geometry('1400x900')
@@ -50,7 +51,7 @@ def encode_ui() -> None:
     view_label.config(text = 'Encoded text (view only)')
 
     # these buttons need their commands changed
-    runner_button.config(text = 'Encode!', command = run_decode)
+    runner_button.config(text = 'Encode!', command = run_encode)
     huffman_tree_button.config(text = 'Download Huffman Tree', command = download)
     download_file_button.config(text = 'Download Encoded File and Tree')
 
@@ -67,7 +68,7 @@ def decode_ui() -> None:
     view_label.config(text = 'Decoded text (view only)')
 
     # these buttons need their command changed
-    runner_button.config(text = 'Decode!', command = run_encode)
+    runner_button.config(text = 'Decode!', command = run_decode)
     huffman_tree_button.config(text = 'Upload Huffman Tree', command = browse_file)
     download_file_button.config(text = 'Download Decoded File')
     return None
@@ -78,6 +79,13 @@ def run_encode() -> None:
     Runs the backend
     Should be connected to a back end funtion
     """
+    # this should return the encoded file, the SER file
+    # and the Huffman tree for visualzation 
+    tree_visualization.tree_visualization(...)
+    img = Image.open('graph.png')
+    tkimage = Image.PhotoImage(img)
+    final_image = Label(tab2, image=tkimage)
+    final_image.pack()
     
     ...
 
@@ -99,6 +107,7 @@ def download() -> None:
 
 # Toggle buttons
 var = IntVar(None, 1)  # '1' represents the default toggle option
+run_var = IntVar(None, 1)
 encode_button = Radiobutton(tab1, text = 'Encode', command = encode_ui, variable=var, value = 1)
 encode_button.place(x = 1000, y = 20)
 decode_button = Radiobutton(tab1, text = 'Decode', command = decode_ui, variable=var, value = 2)
@@ -116,6 +125,11 @@ huffman_tree_button.place(x = 1250, y = 450, anchor = 'e')
 download_file_button = Button(tab1, text = '', width = 30, height=5, command = download)
 download_file_button.place(x=1250, y = 550, anchor = 'e')
 encode_ui()
+
+
+########################################################################################
+#tab2 AKA tree visulization
+########################################################################################
 
 
 
