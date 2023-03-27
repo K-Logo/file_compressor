@@ -128,6 +128,59 @@ class HuffmanTree:
             bits = bits[1:]
             return self._left.find_character(bits)
 
+    def get_root(self) -> Node:
+        return self._root
+
+    def get_edges_and_verticies(self, final_verticies: [], final_edges: []) -> None:
+        """
+        Recursively mutate final_verticies and final_edges
+        """
+        instant_vertices_dict = {}
+        instant_vertices_dict['frequency'] = self._root.frequency
+        instant_vertices_dict['character'] = ''
+
+        if self._right is not None:
+            instant_edges_dict = {}
+            instant_edges_dict['source'] = self._root.frequency
+
+            if isinstance(self._right, HuffmanTree):
+                instant_edges_dict['target'] = self._right.get_root().frequency
+
+            elif isinstance(self._right, Node):
+                instant_edges_dict['target'] = self._right.frequency
+                node_vertices_dict = {}
+                node_vertices_dict['frequency'] = self._right.frequency
+                node_vertices_dict['character'] = self._right.character
+                final_verticies.append(node_vertices_dict)
+
+            instant_edges_dict['bit'] = 1
+            final_edges.append(instant_edges_dict)
+
+            if isinstance(self._right, HuffmanTree):
+                self._right.get_edges_and_verticies(final_verticies, final_edges)
+
+        if self._left is not None:
+            instant_edges_dict = {}
+            instant_edges_dict['source'] = self._root.frequency
+
+            if isinstance(self._left, HuffmanTree):
+                instant_edges_dict['target'] = self._left.get_root().frequency
+
+            elif isinstance(self._left, Node):
+                instant_edges_dict['target'] = self._left.frequency
+                node_vertices_dict = {}
+                node_vertices_dict['frequency'] = self._left.frequency
+                node_vertices_dict['character'] = self._left.character
+                final_verticies.append(node_vertices_dict)
+
+            instant_edges_dict['bit'] = 0
+            final_edges.append(instant_edges_dict)
+
+            if isinstance(self._left, HuffmanTree):
+                self._left.get_edges_and_verticies(final_verticies, final_edges)
+
+        final_verticies.append(instant_vertices_dict)
+
 
 def get_min(lst: list[tuple]) -> tuple:
     min_so_far = lst[0]
