@@ -35,10 +35,23 @@ view_box = Text(tab1)
 view_box.place(x=20, y=430, width=750, height=350)
 view_box.config(state=DISABLED)
 
+tree_file = ''
+encode_file = ''
+decode_file = ''
 
-def browse_file() -> None:
+
+def browse_tree() -> None:
     filename = filedialog.askopenfilename()
-    return filename
+    tree_file = filename
+
+
+def browse_encode() -> None:
+    filename = filedialog.askopenfilename()
+    encode_file = filename
+
+
+def browse_decode() -> None:
+    decode_file = filedialog.askopenfilename()
 
 
 def encode_ui() -> None:
@@ -47,16 +60,17 @@ def encode_ui() -> None:
     is clicked.
     """
     message = 'Enter the original text here...'
-    new_label.config(text = message)
-    view_label.config(text = 'Encoded text (view only)')
+    new_label.config(text=message)
+    view_label.config(text='Encoded text (view only)')
 
     # these buttons need their commands changed
-    runner_button.config(text = 'Encode!', command = run_encode)
-    huffman_tree_button.config(text = 'Download Huffman Tree', command = download)
-    download_file_button.config(text = 'Download Encoded File and Tree')
+    runner_button.config(text='Encode!', command=run_encode)
+    upload_file_button.config(command=browse_encode)
+    huffman_tree_button.config(text='Download Huffman Tree', command=download)
+    download_file_button.config(text='Download Encoded File and Tree')
 
     return None
-    
+
 
 def decode_ui() -> None:
     """
@@ -64,13 +78,14 @@ def decode_ui() -> None:
     is clicked.
     """
     message = 'Enter the encoded text here...'
-    new_label.config(text = message)
-    view_label.config(text = 'Decoded text (view only)')
+    new_label.config(text=message)
+    view_label.config(text='Decoded text (view only)')
 
     # these buttons need their command changed
-    runner_button.config(text = 'Decode!', command = run_decode)
-    huffman_tree_button.config(text = 'Upload Huffman Tree', command = browse_file)
-    download_file_button.config(text = 'Download Decoded File')
+    runner_button.config(text='Decode!', command=run_decode)
+    upload_file_button.config(command=browse_decode)
+    huffman_tree_button.config(text='Upload Huffman Tree', command=browse_tree)
+    download_file_button.config(text='Download Decoded File')
     return None
 
 
@@ -80,14 +95,15 @@ def run_encode() -> None:
     Should be connected to a back end funtion
     """
     # this should return the encoded file, the SER file
-    # and the Huffman tree for visualzation 
+    # and the Huffman tree for visualzation
     tree_visualization.tree_visualization(...)
-    img = Image.open('graph.png')
-    tkimage = Image.PhotoImage(img)
-    final_image = Label(tab2, image=tkimage)
-    final_image.pack()
-    
-    ...
+
+    img = Label(tab2, image='graph.png')
+    # tkimage = Image.PhotoImage(img)
+    # final_image = Label(tab2, image=tkimage)
+    # final_image.pack()
+    img.place(x=0, y=0, anchor='center')
+
 
 def run_decode() -> None:
     """
@@ -95,6 +111,7 @@ def run_decode() -> None:
     Should be connected to a back end funtion
     """
     ...
+
 
 def download() -> None:
     """
@@ -116,25 +133,20 @@ decode_button.place(x = 1100, y = 20)
 runner_button = Button(tab1, text = '', width = 30, height=5, command = run_encode)
 runner_button.place(x = 1250, y =150, anchor = 'e')
 
-upload_file_button = Button(tab1, text = 'Upload Text File...', command = browse_file, width = 30, height=5)
-upload_file_button.place(x = 1250, y = 350, anchor = 'e')
+upload_file_button = Button(tab1, text = 'Upload Text File...', command=browse_encode, width = 30, height=5)
+upload_file_button.place(x=1250, y=350, anchor = 'e')
 
-huffman_tree_button = Button(tab1, text = '', command = browse_file, width = 30, height=5)
-huffman_tree_button.place(x = 1250, y = 450, anchor = 'e')
+huffman_tree_button = Button(tab1, text = '', command = browse_tree, width = 30, height=5)
+huffman_tree_button.place(x=1250, y=450, anchor='e')
 
-download_file_button = Button(tab1, text = '', width = 30, height=5, command = download)
-download_file_button.place(x=1250, y = 550, anchor = 'e')
+download_file_button = Button(tab1, text = '', width=30, height=5, command=download)
+download_file_button.place(x=1250, y=550, anchor='e')
 encode_ui()
 
 
 ########################################################################################
 #tab2 AKA tree visulization
 ########################################################################################
-
-
-
-
-
 
 
 # def helloCallBack():
@@ -166,5 +178,3 @@ encode_ui()
 # myLabel.pack()
 
 root.mainloop()
-
-
