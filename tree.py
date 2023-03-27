@@ -57,7 +57,6 @@ class HuffmanTree:
         22
         >>> type(tree._left)
         >>> tree._right
-
         """
         lst = []
         for node in og_lst:
@@ -112,7 +111,6 @@ class HuffmanTree:
         >>> tree = HuffmanTree(1)
         >>> tree.add([Node("c", 1), Node("a", 2),Node("b", 8),Node("d", 6),Node("g", 5),])
         >>> tree.find_character(bits="0011")
-
         :param bits:
         :return:
         """
@@ -133,10 +131,9 @@ class HuffmanTree:
         else:
             return self._root.frequency
 
-    def get_edges_and_verticies(self, final_verticies: [], final_edges: []) -> None:
+    def get_edges_and_verticies(self, final_verticies: [], final_edges: [], identifier: int) -> None:
         """
         Recursively mutate final_verticies and final_edges
-
         >>> tree = HuffmanTree(1)
         >>> tree.add([Node("c", 1), Node("a", 2),Node("b", 8),Node("d", 6),Node("g", 5),])
         >>> lst = []
@@ -145,20 +142,26 @@ class HuffmanTree:
         >>> lst
         >>> edges
         """
+        new_identifier = identifier + 1
         instant_vertices_dict = {}
+        instant_vertices_dict['name'] = identifier
         instant_vertices_dict['frequency'] = self.get_root_frequency()
         instant_vertices_dict['character'] = ''
 
         if self._right is not None:
             instant_edges_dict = {}
-            instant_edges_dict['source'] = self.get_root_frequency()
+            instant_edges_dict['source'] = identifier
 
             if isinstance(self._right, HuffmanTree):
-                instant_edges_dict['target'] = self._right.get_root_frequency()
+                instant_edges_dict['target'] = new_identifier
+                new_identifier += 1
 
             elif isinstance(self._right, Node):
-                instant_edges_dict['target'] = self._right.frequency
+                instant_edges_dict['target'] = new_identifier
+                new_identifier += 1
                 node_vertices_dict = {}
+                node_vertices_dict['name'] = new_identifier
+                new_identifier += 1
                 node_vertices_dict['frequency'] = self._right.frequency
                 node_vertices_dict['character'] = self._right.character
                 final_verticies.append(node_vertices_dict)
@@ -167,18 +170,22 @@ class HuffmanTree:
             final_edges.append(instant_edges_dict)
 
             if isinstance(self._right, HuffmanTree):
-                self._right.get_edges_and_verticies(final_verticies, final_edges)
+                self._right.get_edges_and_verticies(final_verticies, final_edges, new_identifier)
 
         if self._left is not None:
             instant_edges_dict = {}
-            instant_edges_dict['source'] = self.get_root_frequency()
+            instant_edges_dict['source'] = identifier
 
             if isinstance(self._left, HuffmanTree):
-                instant_edges_dict['target'] = self._left.get_root_frequency()
+                instant_edges_dict['target'] = new_identifier
+                new_identifier += 1
 
             elif isinstance(self._left, Node):
-                instant_edges_dict['target'] = self._left.frequency
+                instant_edges_dict['target'] = new_identifier
+                new_identifier += 1
                 node_vertices_dict = {}
+                node_vertices_dict['name'] = new_identifier
+                new_identifier += 1
                 node_vertices_dict['frequency'] = self._left.frequency
                 node_vertices_dict['character'] = self._left.character
                 final_verticies.append(node_vertices_dict)
@@ -187,7 +194,7 @@ class HuffmanTree:
             final_edges.append(instant_edges_dict)
 
             if isinstance(self._left, HuffmanTree):
-                self._left.get_edges_and_verticies(final_verticies, final_edges)
+                self._left.get_edges_and_verticies(final_verticies, final_edges, new_identifier)
 
         final_verticies.append(instant_vertices_dict)
 
