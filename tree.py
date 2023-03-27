@@ -3,7 +3,7 @@ from typing import Any, Optional
 
 
 class Node:
-    "Class for the Node data type."
+    """Class for the Node data type."""
     character: Optional[str]
     frequency: int
 
@@ -24,14 +24,16 @@ class Node:
             return bits
         else:
             return ""
+
     def find_character(self, bit: str) -> str:
         return self.character
 
+
 class HuffmanTree:
-    "Contains the code for the huffman tree"
+    """Contains the code for the huffman tree"""
     _root: Optional[Node]
 
-    def __init__(self, root: Optional[int]) -> None:
+    def __init__(self, root: Optional[Node] | Optional[int]) -> None:
         if root is None:
             self._root = None
             self._left = None
@@ -41,12 +43,11 @@ class HuffmanTree:
             self._left = HuffmanTree(None)
             self._right = HuffmanTree(None)
 
-    def add_subtrees(self, left: Optional[Node], right:Optional[Node]):
+    def add_subtrees(self, left: Optional[Node], right: Optional[Node]):
         if left is not None:
             self._left = left
         if right is not None:
             self._right = right
-
 
     def add(self, og_lst: list[Node]):
         """
@@ -68,7 +69,7 @@ class HuffmanTree:
             min2_num = get_min(lst)
             min2 = lst.pop(lst.index(min2_num))
 
-            tree = HuffmanTree(root= min1_num[0] + min2_num[0])
+            tree = HuffmanTree(root=min1_num[0] + min2_num[0])
 
             tree.add_subtrees(min2[1], min1[1])
 
@@ -80,12 +81,11 @@ class HuffmanTree:
         self._left = tree._left
         self._right = tree._right
 
-
     def insert(self, node):
         if self._left is None:
              self._left = HuffmanTree(node)
         elif self._right is None:
-            self._right= HuffmanTree(node)
+            self._right = HuffmanTree(node)
 
     def find_huffman_value(self, char: str, bits: str) -> str:
         """
@@ -107,7 +107,6 @@ class HuffmanTree:
         else:
             return self._left.find_huffman_value(char, bits + "0") + self._right.find_huffman_value(char, bits + "1")
 
-
     def find_character(self, bits: str) -> Optional[str]:
         """
         >>> tree = HuffmanTree(1)
@@ -128,23 +127,34 @@ class HuffmanTree:
             bits = bits[1:]
             return self._left.find_character(bits)
 
-    def get_root(self) -> Node:
-        return self._root
+    def get_root_frequency(self) -> int:
+        if isinstance(self._root, int):
+            return self._root
+        else:
+            return self._root.frequency
 
     def get_edges_and_verticies(self, final_verticies: [], final_edges: []) -> None:
         """
         Recursively mutate final_verticies and final_edges
+
+        >>> tree = HuffmanTree(1)
+        >>> tree.add([Node("c", 1), Node("a", 2),Node("b", 8),Node("d", 6),Node("g", 5),])
+        >>> lst = []
+        >>> edges = []
+        >>> tree.get_edges_and_verticies(lst, edges)
+        >>> lst
+        >>> edges
         """
         instant_vertices_dict = {}
-        instant_vertices_dict['frequency'] = self._root.frequency
+        instant_vertices_dict['frequency'] = self.get_root_frequency()
         instant_vertices_dict['character'] = ''
 
         if self._right is not None:
             instant_edges_dict = {}
-            instant_edges_dict['source'] = self._root.frequency
+            instant_edges_dict['source'] = self.get_root_frequency()
 
             if isinstance(self._right, HuffmanTree):
-                instant_edges_dict['target'] = self._right.get_root().frequency
+                instant_edges_dict['target'] = self._right.get_root_frequency()
 
             elif isinstance(self._right, Node):
                 instant_edges_dict['target'] = self._right.frequency
@@ -161,10 +171,10 @@ class HuffmanTree:
 
         if self._left is not None:
             instant_edges_dict = {}
-            instant_edges_dict['source'] = self._root.frequency
+            instant_edges_dict['source'] = self.get_root_frequency()
 
             if isinstance(self._left, HuffmanTree):
-                instant_edges_dict['target'] = self._left.get_root().frequency
+                instant_edges_dict['target'] = self._left.get_root_frequency()
 
             elif isinstance(self._left, Node):
                 instant_edges_dict['target'] = self._left.frequency
