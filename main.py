@@ -104,14 +104,26 @@ def run_encode() -> None:
     Should be connected to a back end funtion
     """
     # this should return the encoded file, the SER file
-    if len(input_text.get(1.0, END)) >= 1:
+    if len(input_text.get(1.0, END)) > 1:
         save_text()
         encode('input.txt')
+        encode_text = ""
+        with open("output.bnr", "rb") as f:
+            lines = f.readlines()
 
+            for line in lines:
+                x = format(int.from_bytes(line, 'little'), '023b')[::-1]
+                line = str(x)
+                for char in line:
+                    encode_text = encode_text + str(char)
+
+
+        view_box.delete(0, END)
+        view_box.insert(0, encode_text)
+        print("Encode UI done!")
     else:
         encoded_file = browse_encode()
         encode(encoded_file)
-
     pop_up = Toplevel(root)
     pop_up.geometry("550x250")
     pop_up.title("Encode Finished")
@@ -120,19 +132,6 @@ def run_encode() -> None:
     final_download = Button(pop_up, text='Download!', command=downloadKey)
     final_download.pack()
 
-    encode_text =""
-    with open("output.bnr", "rb") as f:
-        lines = f.readlines()
-
-        for line in lines:
-            x = format(int.from_bytes(line, 'little'), '023b')[::-1]
-            line = str(x)
-            for char in line:
-                encode_text = encode_text + str(char)
-
-    print(encode_text)
-    view_box.delete(0, END)
-    view_box.insert(0, encode_text)
     # display_string = 'Paste this into the pop up for decode to decode your file!: '
     #
     # key_label = Text(tab1, height=50)
@@ -162,7 +161,7 @@ def run_decode() -> None:
     Should be connected to a back end funtion
     """
     key = filedialog.askopenfilename()
-    if len(input_text.get(1.0, END)) >= 1:
+    if len(input_text.get(1.0, END)) > 1:
         display = decode_input(input_text.get(1.0, END), key)
     else:
         decoded_file = browse_decode()
@@ -268,6 +267,7 @@ def encode(file: str):
             "Frequency":freq
         })
         df.to_csv("key.csv")
+        print("Encoding Done!")
 
 
 def decode_input(input: str, key: str) -> str:
@@ -321,7 +321,6 @@ def decode(file: str, key: str) -> str:
                 # Turns the byte into a string of either 0 or 1
                 x = format(int.from_bytes(line, 'little'), '023b')[::-1]
                 line = str(x)
-                print(line)
                 # iterates though every single one or zero
                 for charater in line:
                     string_so_far = string_so_far + charater
@@ -334,7 +333,6 @@ def decode(file: str, key: str) -> str:
                         line_so_far += char
                         string_so_far = ""
                         o.write(char)
-        print(line_so_far)
         return line_so_far
 
 
