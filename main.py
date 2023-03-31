@@ -64,6 +64,7 @@ def encode_ui() -> None:
     download_file_button.config(text='Download Encoded File and Tree')
 
     # runner_button_for_text.config(text='Run Encode for Text!!', command = run_encode)
+    input_text.delete("1.0", "end")
 
     return None
 
@@ -82,6 +83,7 @@ def decode_ui() -> None:
     # upload_file_button.config(command=browse_decode)
     # huffman_tree_button.config(text='Upload Huffman Tree', command=browse_tree)
     download_file_button.config(text='Download Decoded File')
+    input_text.delete("1.0", "end")
 
     # runner_button_for_text.config(text='DO NOT CLICK')
     return None
@@ -101,7 +103,7 @@ def decode_ui() -> None:
 def run_encode() -> None:
     """
     Runs the backend
-    Should be connected to a back end funtion
+    Should be connected to a back end function
     """
     # this should return the encoded file, the SER file
     if len(input_text.get(1.0, END)) > 1:
