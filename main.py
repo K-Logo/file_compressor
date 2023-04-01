@@ -61,10 +61,10 @@ def encode_ui() -> None:
     runner_button.config(text='Encode!', command=run_encode)
     # upload_file_button.config(command=browse_encode)
     # huffman_tree_button.config(text='Download Huffman Tree', command=download)
-    download_file_button.config(text='Download Encoded File and Tree')
+    download_file_button.config(text='Download Encoded File', command=downloadEncoded)
 
     # runner_button_for_text.config(text='Run Encode for Text!!', command = run_encode)
-    input_text.delete("1.0", "end")
+    input_text.delete(1, END)
 
     return None
 
@@ -82,11 +82,17 @@ def decode_ui() -> None:
     runner_button.config(text='Decode!', command=run_decode)
     # upload_file_button.config(command=browse_decode)
     # huffman_tree_button.config(text='Upload Huffman Tree', command=browse_tree)
-    download_file_button.config(text='Download Decoded File')
-    input_text.delete("1.0", "end")
+    download_file_button.config(text='Download Decoded File', command=download_final_file)
+    input_text.delete(1, END)
 
     # runner_button_for_text.config(text='DO NOT CLICK')
     return None
+
+def download_final_file() -> None:
+    original = r'output.txt'
+    target = filedialog.asksaveasfile(defaultextension=".csv")
+    print("Saved to" + target.name)
+    shutil.copyfile(original, target.name)
 
 # def run_encode_for_text() -> None:
 #     save_text()
@@ -106,18 +112,10 @@ def run_encode() -> None:
     Should be connected to a back end function
     """
     # this should return the encoded file, the SER file
-    if len(input_text.get(1.0, END)) > 1:
-        save_text()
-        encode('input.txt')
-        encode_text = ""
-        with open("output.bnr", "rb") as f:
-            lines = f.readlines()
-
-            for line in lines:
-                x = format(int.from_bytes(line, 'little'), '023b')[::-1]
-                line = str(x)
-                for char in line:
-                    encode_text = encode_text + str(char)
+    if len(input_text.get()) > 0:
+        # save_text()
+        do_this_str = input_text.get()
+        encode_text = encode_input(do_this_str)
 
 
         view_box.delete(0, END)
@@ -153,7 +151,7 @@ def run_encode() -> None:
 
 def save_text():
    text_file = open("input.txt", "w")
-   text_file.write(input_text.get(1.0, END))
+   text_file.write(input_text.get(1, END))
    text_file.close()
 
 
@@ -163,8 +161,9 @@ def run_decode() -> None:
     Should be connected to a back end funtion
     """
     key = filedialog.askopenfilename()
-    if len(input_text.get(1.0, END)) > 1:
-        display = decode_input(input_text.get(1.0, END), key)
+    if len(input_text.get()) > 0:
+        do_this_str = input_text.get()
+        display = decode_input(do_this_str, key)
     else:
         decoded_file = browse_decode()
         display = decode(decoded_file, key)
@@ -194,10 +193,9 @@ def downloadEncoded() -> None:
     """
 
     original = r'output.bnr'
-    target = filedialog.askopenfilename()
-
-
-    shutil.copyfile(original, target)
+    target = filedialog.asksaveasfile(defaultextension=".bnr")
+    print("Saved to" + target.name)
+    shutil.copyfile(original, target.name)
 
 
 def open_file(file: str) -> dict:
@@ -211,7 +209,7 @@ def open_file(file: str) -> dict:
         for i in lines:
             for j in i:
                 if j not in frequency:
-                    frequency[j] = 0
+                    frequency[j] = 1
                 else:
                     frequency[j] += 1
     return frequency
@@ -224,6 +222,50 @@ def get_binary_values(tree, letters) -> dict:
         value = tree.find_huffman_value(i, "")
         values[i] = value
     return values
+
+def encode_input(text: str) -> str:
+    """
+    Encodes the text that the user inputs
+    """
+    # Creates a key by iterating though the string
+    key = dict()
+    for i in text:
+        if i in key:
+            key[i] += 1
+        else:
+            key[i] = 1
+
+    # Uses the key to create a Huffman Tree
+    tree = HuffmanTree(1)
+    key_list = []
+    letters = []
+    for i in key:
+        key_list.append(Node(i, key[i]))
+        letters.append(i)
+    tree.add(key_list)
+
+    #
+    values = get_binary_values(tree, letters)
+    output = ""
+    for i in text:
+        output += values[i]
+
+    char = []
+    freq = []
+    for i in key_list:
+        char.append(i.character)
+        freq.append(i.frequency)
+
+    df = pd.DataFrame({
+        "Character": char,
+        "Frequency": freq
+    })
+    df.to_csv("key.csv")
+    print("Encoding Done!")
+
+    return output
+
+
 
 
 def encode(file: str):
@@ -358,7 +400,7 @@ if __name__ == '__main__':
     new_label = Label(tab1, text='Please select an option')
     new_label.place(x=20, y=20, anchor='w')
 
-    input_text = Text(tab1)
+    input_text = Entry(tab1)
     input_text.place(x=20, y=40, width=750, height=350)
 
     view_label = Label(tab1, text='Please select an option')
