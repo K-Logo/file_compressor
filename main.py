@@ -514,6 +514,9 @@ def get_svg(svg_file: str) -> None:
 #             self.canvas.lower(imageid)  # set image into background
 #             self.canvas.imagetk = imagetk  # keep an extra reference to prevent garbage-collection
 
+
+# Below is the code for the scroll bar and zooming/dragging into the tree graph
+# Code source: https://stackoverflow.com/questions/25787523/move-and-zoom-a-tkinter-canvas-with-mouse/48069295#48069295
 class AutoScrollbar(ttk.Scrollbar):
     ''' A scrollbar that hides itself if it's not needed.
         Works only if you use the grid geometry manager '''
