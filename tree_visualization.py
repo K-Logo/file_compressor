@@ -1,118 +1,83 @@
-from __future__ import annotations
-from typing import Any
-from tkinter import *
-from tkinter import ttk
-from tkinter import filedialog
-import igraph as ig
-from igraph import Graph, EdgeSeq
-import plotly.graph_objects as go
+import pydot
+from IPython.display import Image, display
 from tree import HuffmanTree, Node
 
 
-nr_vertices = 14
-v_label = list(map(str, range(nr_vertices)))
-G = Graph.Tree(nr_vertices, 2) # 2 stands for children number
-lay = G.layout('rt')
+G = pydot.Dot(graph_type="digraph")
 
-position = {k: lay[k] for k in range(nr_vertices)}
-Y = [lay[k][1] for k in range(nr_vertices)]
-M = max(Y)
+# Example tree
+tree = HuffmanTree(1)
+tree.add([Node("c", 1), Node("a", 2), Node("b", 8), Node("d", 6), Node("g", 5), ])
 
-es = EdgeSeq(G) # sequence of edges
-E = [e.tuple for e in G.es] # list of edges
+identifier = 0
+visited_names = set()
 
-L = len(position)
-Xn = [position[k][0] for k in range(L)]
-Yn = [2*M-position[k][1] for k in range(L)]
-Xe = []
-Ye = []
-for edge in E:
-    Xe+=[position[edge[0]][0],position[edge[1]][0], None]
-    Ye+=[2*M-position[edge[0]][1],2*M-position[edge[1]][1], None]
 
-labels = v_label
+def add_nodes_and_edges(G: pydot.Dot, tree: HuffmanTree, visited_names: set, identifier: int) -> None:
+    """Takes in a directed graph and a huffman tree, adds the nodes and edges
+    of the Huffman tree to the graphviz directed graph object.
 
-fig = go.Figure()
-fig.add_trace(go.Scatter(x=Xe,
-                   y=Ye,
-                   mode='lines',
-                   line=dict(color='rgb(210,210,210)', width=1),
-                   hoverinfo='none'
-                   ))
-fig.add_trace(go.Scatter(x=Xn,
-                  y=Yn,
-                  mode='markers',
-                  name='bla',
-                  marker=dict(symbol='circle-dot',
-                                size=18,
-                                color='#6175c1',    #'#DB4551',
-                                line=dict(color='rgb(50,50,50)', width=1)
-                                ),
-                  text=labels,
-                  hoverinfo='text',
-                  opacity=0.8
-                  ))
+    visited_names keeps track of the names (identifiers) of the nodes already used, to make sure the nodes'
+    names are not duplicated. Note that the names for the node objects are merely unique identifiers; they are not
+    actually displayed on the graph.
 
-axis = dict(showline=False, # hide axis line, grid, ticklabels and  title
-            zeroline=False,
-            showgrid=False,
-            showticklabels=False,
-            )
-
-fig.write_image('graph.png')
-
-def tree_visualization(tree: HuffmanTree) -> None:
+    Preconditions:
+        - identifier not in visited_names
+        - all(isinstance(element, str) for element in visited_names)
+        - all elements in visited_names are strings of natural numbers
     """
-    This is the function that allows us to visualize a tree given the dict of
-    the frequency of the characters
-    """
-    # display_tree = Graph.Tree()
-    # lay = tree.layot('rt')
+    visited_names.add(identifier)
 
-    # Given the huffman tree, keep track of the verticies and the edges
-    # and use that to create the graph
-    verticies = []
-    edges = []
-    get_edges_and_verticies(tree, verticies, edges)
+    # new_identifier will be the name of the child nodes
+    new_identifier = identifier + 1
+    while new_identifier in visited_names:
+        new_identifier += 1
+    visited_names.add(new_identifier)
+    root_name = str(identifier)
 
-    graph = Graph.DictList(verticies, edges)
+    # Add the root to dot
+    if isinstance(tree._root, int):
+        node = pydot.Node(name=root_name, label=str(tree._root))
+        G.add_node(node)
+    elif isinstance(tree._root, Node):
+        node = pydot.Node(name=root_name, label=str(tree._root.frequency))
+        G.add_node(node)
+    if tree._right is not None:
+        if isinstance(tree._right, HuffmanTree):
+            # Recurse into the right subtree
+            add_nodes_and_edges(G, tree._right, visited_names, new_identifier)
+            edge = pydot.Edge(root_name, str(new_identifier))
+            G.add_edge(edge)
+        elif isinstance(tree._right, Node):
+            # Note that we cannot recurse into a Node object
+            node = pydot.Node(name=str(new_identifier), label=str(tree._right.frequency)+ ' ' + tree._right.character)
+            G.add_node(node)
+            visited_names.add(new_identifier)
+            edge = pydot.Edge(root_name, str(new_identifier))
+            G.add_edge(edge)
 
-    layout = graph.layout_reingold_tilford
+    # Refresh new_identifier
+    while new_identifier in visited_names:
+        new_identifier += 1
 
-    ig.plot(graph, layout)
+    if tree._left is not None:
+        if isinstance(tree._left, HuffmanTree):
+            # Recurse into the left subtree
+            add_nodes_and_edges(G, tree._left, visited_names, new_identifier)
+            edge = pydot.Edge(root_name, str(new_identifier))
+            G.add_edge(edge)
+        elif isinstance(tree._left, Node):
+            # Note that we cannot recurse into a Node object
+            node = pydot.Node(name=str(new_identifier), label=str(tree._left.frequency)+ ' ' + tree._left.character)
+            G.add_node(node)
+            visited_names.add(new_identifier)
+            edge = pydot.Edge(root_name, str(new_identifier))
+            G.add_edge(edge)
 
+add_nodes_and_edges(G, tree, set(), 0)
 
+im = Image(G.create_jpeg())
 
-def get_edges_and_verticies(tree: HuffmanTree, final_verticies = [], final_edges = []) -> None:
-    """
-    Recursively mutate final_verticies and final_edges 
-    """
+display(im)
 
-    if tree._root is None:
-        pass
-
-    else:
-        instant_vertices_dict = {}
-        instant_vertices_dict['frequency'] = tree._root.frequency
-        if tree._root.character is not None:
-            instant_vertices_dict['character'] = tree._root.character
-        else:
-            instant_vertices_dict['character'] = ''
-
-        final_verticies.append(instant_vertices_dict)
-        
-        instant_edges_dict = {}
-        if tree._right is not None:
-            instant_edges_dict['source'] = tree._root.frequency
-            instant_edges_dict['target'] = tree._right._root.frequency
-            instant_edges_dict['bit'] = 1
-            final_edges.append(instant_edges_dict)
-            get_edges_and_verticies(tree._right, final_verticies, final_edges)
-        elif tree._left is not None:
-            instant_edges_dict['source'] = tree._root.frequency
-            instant_edges_dict['target'] = tree._left._root.frequency
-            instant_edges_dict['bit'] = 0
-            final_edges.append(instant_edges_dict)
-            get_edges_and_verticies(tree._left, final_verticies, final_edges)
-
-
+G.write_jpeg("pleaseworkfortheloveofgod.jpeg")
