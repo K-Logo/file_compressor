@@ -1,8 +1,8 @@
+from __future__ import annotations
 from typing import Any, Optional
-# from Bitset import Bitset
 import graphviz
 
-
+# @check_contracts
 class Node:
     """
     Class for the Node data type.
@@ -45,11 +45,17 @@ class Node:
 
         Preconditons:
             - isinstance(char, str)
-            #TODO START HERE
+            - self.character is not None
         """
         self.character = char
 
     def find_huffman_value(self, char: str, bits: str) -> str:
+        """
+        Finds the binary value for the given character
+
+        Preconditions:
+            - char is not None and isinstance(char, str)
+        """
         if self.character == char:
             return bits
         else:
@@ -58,23 +64,30 @@ class Node:
     def find_character(self, bit: str) -> str:
         return self.character
 
-
+# @check_contracts
 class HuffmanTree:
     """Contains the code for the huffman tree.
-
-    Instance Attributes:
-    - _root:
-        The root of the tree.
-        It either represents the sum of characters from all of its subtrees or it contains a Node with the character,
-        which means it's a leaf.
 
     Representation invariants:
         - self._root is Node or self._root is None or isinstance(self._root, int)
     """
-    _root: Optional[Node] | Optional[int]
+    # Private Inttance Attributes:
+    #    - _root:
+    #       The root of the tree.
+    #       It either represents the sum of characters from all of its subtrees or it contains a Node with the character,
+    #       which means it's a leaf.
+    #   - _left:
+    #       The left subtree/node of the tree.
+    #       If self._left is a Node object, then it is a leaf.
+    #   - _right:
+    #       The right subtree/node of the tree.
+    #       If self._right is a Node object, then it is a leaf.
+    _root: Optional[Node] | int
+    _left: Optional[Node] | Optional[HuffmanTree]
+    _right: Optional[Node] | Optional[HuffmanTree]
 
-    def __init__(self, root: Optional[Node] | Optional[int]) -> None:
-        """Initializes a HuffmanTree by setting its _root and _left and _right subtrees
+    def __init__(self, root: Optional[Node] | int) -> None:
+        """Initializes a HuffmanTree by setting its _root and _left and _right subtrees.
         """
         if root is None:
             self._root = None
@@ -86,7 +99,7 @@ class HuffmanTree:
             self._right = HuffmanTree(None)
 
     def add_subtrees(self, left: Optional[Node], right: Optional[Node]) -> None:
-        """Adds subtrees to self
+        """Adds subtrees to self.
         """
         if left is not None:
             self._left = left
@@ -94,12 +107,15 @@ class HuffmanTree:
             self._right = right
 
     def delete_subtrees(self) -> None:
-        """Assigns the left and right subtrees to None"""
+        """Assigns the left and right subtrees to None.
+        """
         self._left = None
         self._right = None
 
-    def add(self, og_lst: list[Node]) -> None:
-        """
+    def add(self, input_lst: list[Node]) -> None:
+        """Creates the Huffman Tree by adding the nodes in list as leaves, and creates the intermediary nodes with the
+        sum of frequencies from all of the subtrees below it.
+
         >>> tree = HuffmanTree(1)
         >>> tree.add([Node("c", 1), Node("a", 2),Node("b", 8),Node("d", 6),Node("g", 5),])
         >>> tree._root
@@ -111,7 +127,7 @@ class HuffmanTree:
         '0'
         """
         lst = []
-        for node in og_lst:
+        for node in input_lst:
             lst.append((node.frequency, node))
 
         if len(lst) == 1:
@@ -137,14 +153,28 @@ class HuffmanTree:
             self._left = tree._left
             self._right = tree._right
 
-    def insert(self, node):
-        if self._left is None:
-             self._left = HuffmanTree(node)
-        elif self._right is None:
-            self._right = HuffmanTree(node)
+    def get_root(self) -> Optional[Node] | Optional[int]:
+        """Returns self._root.
+        """
+        return self._root
+
+    def get_left(self) -> Optional[Node] | Optional[int]:
+        """Returns self._left.
+        """
+        return self._left
+
+    def get_right(self) -> Optional[Node] | Optional[int]:
+        """Returns self._right.
+        """
+        return self._right
 
     def find_huffman_value(self, char: str, bits: str) -> str:
-        """
+        """Returns the string of bits that represents char in the tree. Implemented recursively.
+
+        Preconditions:
+            - char is a valid ASCII character
+            - bits == '' or all(bit == '0' or bit == '1' for bit in bits)
+
         >>> tree = HuffmanTree(1)
         >>> tree.add([Node("c", 1), Node("a", 2),Node("b", 8),Node("d", 6),Node("g", 5),])
         >>> lst = ["c", "a", "b", "d", "g"]
@@ -166,12 +196,12 @@ class HuffmanTree:
             return self._left.find_huffman_value(char, bits + "0") + self._right.find_huffman_value(char, bits + "1")
 
     def find_character(self, bits: str) -> Optional[str]:
-        """
+        """Returns the character represented by the set of bits.
+
         >>> tree = HuffmanTree(1)
         >>> tree.add([Node("c", 1), Node("a", 2),Node("b", 8),Node("d", 6),Node("g", 5),])
         >>> tree.find_character(bits="0011")
-        :param bits:
-        :return:
+        'c'
         """
         if self._left is None and self._right is None:
             return self._root.character
@@ -190,83 +220,13 @@ class HuffmanTree:
         else:
             return self._root.frequency
 
-
-
-
-
-    # def get_edges_and_verticies(self, final_verticies: [], final_edges: [], identifier: int) -> None:
-    #     """
-    #     Recursively mutate final_verticies and final_edges
-    #     >>> tree = HuffmanTree(1)
-    #     >>> tree.add([Node("c", 1), Node("a", 2),Node("b", 8),Node("d", 6),Node("g", 5),])
-    #     >>> lst = []
-    #     >>> edges = []
-    #     >>> tree.get_edges_and_verticies(lst, edges)
-    #     >>> lst
-    #     >>> edges
-    #     """
-    #     new_identifier = identifier + 1
-    #     instant_vertices_dict = {}
-    #     instant_vertices_dict['name'] = identifier
-    #     instant_vertices_dict['frequency'] = self.get_root_frequency()
-    #     instant_vertices_dict['character'] = ''
-    #
-    #     if self._right is not None:
-    #         instant_edges_dict = {}
-    #         instant_edges_dict['source'] = identifier
-    #
-    #         if isinstance(self._right, HuffmanTree):
-    #             instant_edges_dict['target'] = new_identifier
-    #             new_identifier += 1
-    #
-    #         elif isinstance(self._right, Node):
-    #             instant_edges_dict['target'] = new_identifier
-    #             new_identifier += 1
-    #             node_vertices_dict = {}
-    #             node_vertices_dict['name'] = new_identifier
-    #             new_identifier += 1
-    #             node_vertices_dict['frequency'] = self._right.frequency
-    #             node_vertices_dict['character'] = self._right.character
-    #             final_verticies.append(node_vertices_dict)
-    #
-    #         instant_edges_dict['bit'] = 1
-    #         final_edges.append(instant_edges_dict)
-    #
-    #         if isinstance(self._right, HuffmanTree):
-    #             self._right.get_edges_and_verticies(final_verticies, final_edges, new_identifier)
-    #
-    #     if self._left is not None:
-    #         instant_edges_dict = {}
-    #         instant_edges_dict['source'] = identifier
-    #
-    #         if isinstance(self._left, HuffmanTree):
-    #             instant_edges_dict['target'] = new_identifier
-    #             new_identifier += 1
-    #
-    #         elif isinstance(self._left, Node):
-    #             instant_edges_dict['target'] = new_identifier
-    #             new_identifier += 1
-    #             node_vertices_dict = {}
-    #             node_vertices_dict['name'] = new_identifier
-    #             new_identifier += 1
-    #             node_vertices_dict['frequency'] = self._left.frequency
-    #             node_vertices_dict['character'] = self._left.character
-    #             final_verticies.append(node_vertices_dict)
-    #
-    #         instant_edges_dict['bit'] = 0
-    #         final_edges.append(instant_edges_dict)
-    #
-    #         if isinstance(self._left, HuffmanTree):
-    #             self._left.get_edges_and_verticies(final_verticies, final_edges, new_identifier)
-    #
-    #     final_verticies.append(instant_vertices_dict)
-
-
-
-
-
-
+# @check_contracts
 def get_min(lst: list[tuple]) -> tuple:
+    """Returns the tuple with the smallest first element.
+
+    Preconditions:
+        - all(isinstance(tup[0], int) for tup in list)
+    """
     min_so_far = lst[0]
     for i in lst:
         if i[0] <= min_so_far[0]:
