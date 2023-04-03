@@ -76,7 +76,7 @@ def decode_ui() -> None:
 def download_final_file() -> None:
     """When the user clicks the download decoded file this function is called and downloads that file"""
     original = r'output.txt'
-    target = filedialog.asksaveasfile(defaultextension=".csv")
+    target = filedialog.asksaveasfile(defaultextension=".txt")
 
     shutil.copyfile(original, target.name)
 
