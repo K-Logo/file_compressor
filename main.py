@@ -1,32 +1,30 @@
-"""
-This file is the main file for the text compressor
+"""This file is the main file for the text compressor.
+
+This file is Copyright (c) 2023 Will Kukkamalla, Alex Lee, Kirill Logoveev, and Brandon Wong.
 """
 from __future__ import annotations
-
-import tree_visualization
-from tree import Node, HuffmanTree
 from math import ceil
 import codecs
-import struct
-from typing import Any
 from tkinter import *
-from tkinter import ttk
-from tkinter import filedialog
-import pandas as pd
+from tkinter import ttk, filedialog
 import shutil
+import pandas as pd
+from tree import Node, HuffmanTree
+
+# Optional modules used for the tree visualization, which only works after downloading the library from the website.
+# import graphviz
 # import tree_visualization
-import graphviz
 
 
 def browse_file() -> str:
-    """Function that allows the user to select a file"""
+    """Function that allows the user to select a file
+    """
     filename = filedialog.askopenfilename()
     return filename
 
 
 def encode_ui() -> None:
-    """
-    Displays the GUI for encoding. Called when encode toggle button
+    """Displays the GUI for encoding. Called when encode toggle button
     is clicked.
     """
     message = 'Enter the original text here...'
@@ -51,8 +49,7 @@ def encode_ui() -> None:
 
 
 def decode_ui() -> None:
-    """
-    Displays the GUI for decoding. Called when decode toggle button is clicked.
+    """Displays the GUI for decoding. Called when decode toggle button is clicked.
     """
     message = 'Enter the encoded text here...'
     new_label.config(text=message)
@@ -62,8 +59,10 @@ def decode_ui() -> None:
     download_file_button.config(text='Download Decoded File', command=download_final_file)
     input_text.delete(1, END)
     instruction_label.config(text='When using decode, the program will check whether the input text box has text in it'
-                                  '\n\nIf there is text, when pressing Decode!, the only file you need to input is\n'
-                                  'CSV file for the key you got from encode'
+                                  '\n\nIf there is text, when pressing Decode!, you the first file you need to input is'
+                                  '\n'
+                                  'the CSV file for the key you got from encode then you can input the downloaded bnr '
+                                  'file'
                                   '\n\n'
                                   'If you wish to decode text by using inputing text into the text box, then \n'
                                   'The first file you need to input is the key and the SECOND file you need to input\n'
@@ -78,7 +77,7 @@ def download_final_file() -> None:
     """When the user clicks the download decoded file this function is called and downloads that file"""
     original = r'output.txt'
     target = filedialog.asksaveasfile(defaultextension=".csv")
-    print("Saved to" + target.name)
+
     shutil.copyfile(original, target.name)
 
 
@@ -95,11 +94,9 @@ def run_encode() -> None:
         # save_text()
         do_this_str = input_text.get()
         encode_text = encode_input(do_this_str)
-
-
         view_box.delete(0, END)
         view_box.insert(0, encode_text)
-        print("Encode UI done!")
+
     else:
         encoded_file = browse_file()
         encode(encoded_file)
@@ -119,9 +116,10 @@ def save_text() -> None:
 
     This is used later for the encode and decode functons for inputed text
     """
-    text_file = open("input.txt", "w")
-    text_file.write(input_text.get(1, END))
-    text_file.close()
+    with open("input.txt", "w") as f:
+        text_to_save = input_text.get(1, END)
+        f.write(text_to_save)
+        f.close()
 
 
 def run_decode() -> None:
@@ -133,12 +131,12 @@ def run_decode() -> None:
     key = filedialog.askopenfilename()
     if len(input_text.get()) > 0:
         do_this_str = input_text.get()
-        display = decode_input(do_this_str, key)
+        dis = decode_input(do_this_str, key)
         view_box.delete(0, END)
-        view_box.insert(0, display)
+        view_box.insert(0, dis)
     else:
         decoded_file = browse_file()
-        display = decode(decoded_file, key)
+        decode(decoded_file, key)
 
     pop_up = Toplevel(root)
     pop_up.geometry("550x250")
@@ -153,8 +151,9 @@ def download_key() -> None:
     """
     original = r'key.csv'
     target = filedialog.asksaveasfile(defaultextension=".csv")
-    print("Saved to" + target.name)
+
     shutil.copyfile(original, target.name)
+
 
 def download_encoded() -> None:
     """
@@ -162,7 +161,6 @@ def download_encoded() -> None:
     """
     original = r'output.bnr'
     target = filedialog.asksaveasfile(defaultextension=".bnr")
-    print("Saved to" + target.name)
     shutil.copyfile(original, target.name)
 
 
@@ -181,7 +179,7 @@ def open_file(file: str) -> dict:
     return frequency
 
 
-def get_binary_values(tree, letters) -> dict:
+def get_binary_values(tree: HuffmanTree, letters: list) -> dict:
     """
     Given the tree and the letters it returns the a dictionary that maps the character to their binary value
 
@@ -194,6 +192,7 @@ def get_binary_values(tree, letters) -> dict:
         values[i] = value
     return values
 
+
 def encode_input(text: str) -> str:
     """
     Encodes the text that the user inputs
@@ -201,7 +200,7 @@ def encode_input(text: str) -> str:
         - text is not None
     """
     # Creates a key by iterating though the string
-    key = dict()
+    key = {}
     for i in text:
         if i in key:
             key[i] += 1
@@ -217,7 +216,7 @@ def encode_input(text: str) -> str:
         letters.append(i)
     tree.add(key_list)
 
-    #
+    # writes the binary output
     values = get_binary_values(tree, letters)
     output = ""
     for i in text:
@@ -234,28 +233,18 @@ def encode_input(text: str) -> str:
         "Frequency": freq
     })
     df.to_csv("key.csv")
-    print("Encoding Done!")
 
     return output
 
-def encode(file: str):
+
+def encode(file: str) -> None:
     """Function that encodes and writes the new binary representations of characters to a .bnr file"""
     # Reads the file and returns a dictionary with all of the letters and their frequencies
-    dict = open_file(file)
-
-    letters = []
-    # Creates the tree
-    lst = []
-    for i in dict:
-        lst.append(Node(i, dict[i]))
-        letters.append(i)
-    tree = HuffmanTree(1)
-    tree.add(lst)
-    #TODO ALEX CO hi
+    tree, letters, lst = create_tree_with_file(file)
 
     values = get_binary_values(tree, letters)
 
-    string = ""
+    bits_so_far = ""
 
     # Read through the input file
     with codecs.open(file, encoding="utf-8") as f:
@@ -267,36 +256,55 @@ def encode(file: str):
 
                 sequence_bits = values[character]
 
-                string += sequence_bits
+                bits_so_far += sequence_bits
 
             # Writes the encoded text to a bnr file for the user to download later
             with open("output.bnr", "wb") as o:
-                o.write(int(string[::-1], 2).to_bytes(ceil(len(string) / 8), 'little'))
+                o.write(int(bits_so_far[::-1], 2).to_bytes(ceil(len(bits_so_far) / 8), 'little'))
 
         # Creates the key for the user to download to later decode the file
-        char = []
-        freq = []
-        for i in lst:
-            char.append(i.character)
-            freq.append(i.frequency)
-
-        df = pd.DataFrame({
-            "Character":char,
-            "Frequency":freq
-        })
-        df.to_csv("key.csv")
-        print("Encoding Done!")
+        create_csv_key(lst)
 
 
-def decode_input(input: str, key: str) -> str:
-    """"
+def create_csv_key(lst: list) -> None:
+    """Creates a csv file with the characters and their frequencies which will be used to decode the file"""
+    char = []
+    freq = []
+    for i in lst:
+        char.append(i.character)
+        freq.append(i.frequency)
+
+    df = pd.DataFrame({
+        "Character": char,
+        "Frequency": freq
+    })
+    df.to_csv("key.csv")
+
+
+def create_tree_with_file(file: str) -> list:
+    """Helper function for the encode funtion which creates the tree from the inputted file."""
+    dictionary = open_file(file)
+
+    letters = []
+    # Creates the tree
+    lst = []
+    for i in dictionary:
+        lst.append(Node(i, dictionary[i]))
+        letters.append(i)
+    tree = HuffmanTree(1)
+    tree.add(lst)
+
+    return [tree, letters, lst]
+
+
+def decode_input(text: str, key: str) -> str:
+    """
     Decodes from the input text box
     """
-
     # Creates the tree from the key file
     key_lst = []
     key_csv = pd.read_csv(key)
-    for i, row in key_csv.iterrows():
+    for row in key_csv.iterrows():
         key_lst.append(Node(row["Character"], row["Frequency"]))
 
     # Creates the tree to decode the text
@@ -306,10 +314,10 @@ def decode_input(input: str, key: str) -> str:
     # Iterates through the input to return the decoded string
     output_so_far = ''
     string_so_far = ''
-    for num in input:
+    for num in text:
         string_so_far += num
 
-        char = tree.find_character(string_so_far)
+        char = tree.tree_find_character(string_so_far)
 
         if char is not None:
             output_so_far += char
@@ -317,17 +325,12 @@ def decode_input(input: str, key: str) -> str:
 
     return output_so_far
 
+
 def decode(file: str, key: str) -> str:
     """Decodes the given file by rebuilding the tree using the key"""
-    key_lst = []
-    key_csv = pd.read_csv(key)
-    for i, row in key_csv.iterrows():
-        key_lst.append(Node(row["Character"], row["Frequency"]))
-    # Creates the tree to decode the text
-    tree = HuffmanTree(1)
-    tree.add(key_lst)
+    tree = create_tree_with_key(key)
 
-    tree_visualization.tree_to_svg(tree, 0, set())
+    # tree_visualization.tree_to_svg(tree, 0, set())
 
     # Opens the file to decode the text
     with open(file, "rb") as f:
@@ -346,7 +349,7 @@ def decode(file: str, key: str) -> str:
                 # iterates though every single one or zero
                 for charater in line:
                     string_so_far = string_so_far + charater
-                    char = tree.find_character(string_so_far)
+                    char = tree.tree_find_character(string_so_far)
 
                     # if the char is found then it resets the string to find the next character
                     if char is not None:
@@ -356,6 +359,20 @@ def decode(file: str, key: str) -> str:
                         string_so_far = ""
                         o.write(char)
         return line_so_far
+
+
+def create_tree_with_key(key: str) -> HuffmanTree:
+    """Helper function for the decode function which creates the tree from the key."""
+    key_lst = []
+    key_csv = pd.read_csv(key)
+    for i, row in key_csv.iterrows():
+        key_lst.append(Node(row["Character"], row["Frequency"]))
+
+    # Creates the tree to decode the text
+    tree = HuffmanTree(1)
+    tree.add(key_lst)
+
+    return tree
 
 
 if __name__ == '__main__':
@@ -412,8 +429,11 @@ if __name__ == '__main__':
     # (In PyCharm, select the lines below and press Ctrl/Cmd + / to toggle comments.)
     # You can use "Run file in Python Console" to run PythonTA,
     # and then also test your methods manually in the console.
-    # import python_ta
-    #
-    # python_ta.check_all(config={
-    #     'max-line-length': 120
-    # })
+    import python_ta
+    python_ta.check_all(config={
+        'max-line-length': 120,
+        'extra-imports': ['csv', 'typing', "tree", "math", "codecs", "struct", "tkinter", "pandas",
+                          "shutil", "graphviz", 'tree_visualization'],
+        'disable': ["too-many-function-args", "forbidden-import", "wildcard-import"],
+        'allowed-io': ['encode', 'decode', 'open_file', "save_text", "create_csv_key", "create_tree_with_file"]
+    })
