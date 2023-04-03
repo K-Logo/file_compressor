@@ -304,7 +304,7 @@ def decode_input(text: str, key: str) -> str:
     # Creates the tree from the key file
     key_lst = []
     key_csv = pd.read_csv(key)
-    for i, row in key_csv.iterrows():
+    for _, row in key_csv.iterrows():
         key_lst.append(Node(row["Character"], row["Frequency"]))
 
     # Creates the tree to decode the text
@@ -365,7 +365,7 @@ def create_tree_with_key(key: str) -> HuffmanTree:
     """Helper function for the decode function which creates the tree from the key."""
     key_lst = []
     key_csv = pd.read_csv(key)
-    for i, row in key_csv.iterrows():
+    for _, row in key_csv.iterrows():
         key_lst.append(Node(row["Character"], row["Frequency"]))
 
     # Creates the tree to decode the text
@@ -387,7 +387,9 @@ if __name__ == '__main__':
     # creating new tabs
     tab_control = ttk.Notebook(root)
     tab1 = Frame(tab_control)
+
     tab_control.add(tab1, text='Encode or Decode')
+
     tab_control.pack(expand=1, fill='both')
 
     new_label = Label(tab1, text='Please select an option')
@@ -432,6 +434,6 @@ if __name__ == '__main__':
         'max-line-length': 120,
         'extra-imports': ['csv', 'typing', "tree", "math", "codecs", "struct", "tkinter", "pandas",
                           "shutil", "graphviz", 'tree_visualization'],
-        'disable': ["too-many-function-args", "forbidden-import", "wildcard-import", "unused_variables"],
+        'disable': ["too-many-function-args", "forbidden-import", "wildcard-import"],
         'allowed-io': ['encode', 'decode', 'open_file', "save_text", "create_csv_key", "create_tree_with_file"]
     })
