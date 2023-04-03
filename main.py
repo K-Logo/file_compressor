@@ -434,6 +434,6 @@ if __name__ == '__main__':
         'max-line-length': 120,
         'extra-imports': ['csv', 'typing', "tree", "math", "codecs", "struct", "tkinter", "pandas",
                           "shutil", "graphviz", 'tree_visualization'],
-        'disable': ["too-many-function-args", "forbidden-import", "wildcard-import"],
+        'disable': ["too-many-function-args", "forbidden-import", "wildcard-import", "unused_variables"],
         'allowed-io': ['encode', 'decode', 'open_file', "save_text", "create_csv_key", "create_tree_with_file"]
     })
