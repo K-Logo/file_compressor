@@ -1,20 +1,26 @@
 import pydot
 from IPython.display import Image, display
 from tree import HuffmanTree, Node
+import pandas as pd
 
 
-G = pydot.Dot(graph_type="digraph")
-G.size = "7.75,10.25"
+def key_to_tree(key: str) -> HuffmanTree:
+    """Takes in a csv file of a Huffman Tree, returns a HuffmanTree object
 
-# Example tree
-tree = HuffmanTree(1)
-tree.add([Node("c", 1), Node("a", 2), Node("b", 8), Node("d", 6), Node("g", 5), Node('z', 500), Node('k', 32), Node('q', 100), Node('.', 200), Node('j', 32)])
+    Preconditions:
+        - key is the name of a valid Huffman Tree csv file
+    """
+    key_lst = []
+    key_csv = pd.read_csv(key)
+    for i, row in key_csv.iterrows():
+        key_lst.append(Node(row["Character"], row["Frequency"]))
+    # Creates the tree to decode the text
+    tree = HuffmanTree(1)
+    tree.add(key_lst)
+    return tree
 
-identifier = 0
-visited_names = set()
 
-
-def add_nodes_and_edges(G: pydot.Dot, tree: HuffmanTree, visited_names: set, identifier: int) -> None:
+def tree_to_svg(G: pydot.Dot, tree: HuffmanTree, visited_names: set, identifier: int) -> None:
     """Takes in a directed graph and a huffman tree, adds the nodes and edges
     of the Huffman tree to the graphviz directed graph object.
 
@@ -37,22 +43,23 @@ def add_nodes_and_edges(G: pydot.Dot, tree: HuffmanTree, visited_names: set, ide
     root_name = str(identifier)
 
     # Add the root to dot
-    if isinstance(tree._root, int):
-        node = pydot.Node(name=root_name, label=str(tree._root))
+    if isinstance(tree.get_root(), int):
+        node = pydot.Node(name=root_name, label=str(tree.get_root()))
         G.add_node(node)
-    elif isinstance(tree._root, Node):
-        node = pydot.Node(name=root_name, label=str(tree._root.frequency))
+    elif isinstance(tree.get_root(), Node):
+        node = pydot.Node(name=root_name, label=str(tree.get_root().frequency))
         G.add_node(node)
 
-    if tree._left is not None:
-        if isinstance(tree._left, HuffmanTree):
+    if tree.get_left() is not None:
+        if isinstance(tree.get_left(), HuffmanTree):
             # Recurse into the left subtree
-            add_nodes_and_edges(G, tree._left, visited_names, new_identifier)
+            tree_to_svg(G, tree.get_left(), visited_names, new_identifier)
             edge = pydot.Edge(root_name, str(new_identifier), label='0')
             G.add_edge(edge)
-        elif isinstance(tree._left, Node):
+        elif isinstance(tree.get_left(), Node):
             # Note that we cannot recurse into a Node object
-            node = pydot.Node(name=str(new_identifier), label=str(tree._left.frequency)+ ' ' + tree._left.character)
+            node = pydot.Node(name=str(new_identifier),
+                              label=str(tree.get_left().frequency) + ' ' + tree.get_left().character)
             G.add_node(node)
             visited_names.add(new_identifier)
             edge = pydot.Edge(root_name, str(new_identifier), label='0')
@@ -62,24 +69,30 @@ def add_nodes_and_edges(G: pydot.Dot, tree: HuffmanTree, visited_names: set, ide
     while new_identifier in visited_names:
         new_identifier += 1
 
-    if tree._right is not None:
-        if isinstance(tree._right, HuffmanTree):
+    if tree.get_right() is not None:
+        if isinstance(tree.get_right(), HuffmanTree):
             # Recurse into the right subtree
-            add_nodes_and_edges(G, tree._right, visited_names, new_identifier)
+            tree_to_svg(G, tree.get_right(), visited_names, new_identifier)
             edge = pydot.Edge(root_name, str(new_identifier), label='1')
             G.add_edge(edge)
-        elif isinstance(tree._right, Node):
+        elif isinstance(tree.get_right(), Node):
             # Note that we cannot recurse into a Node object
-            node = pydot.Node(name=str(new_identifier), label=str(tree._right.frequency)+ ' ' + tree._right.character)
+            node = pydot.Node(name=str(new_identifier),
+                              label=str(tree.get_right().frequency) + ' ' + tree.get_right().character)
             G.add_node(node)
             visited_names.add(new_identifier)
             edge = pydot.Edge(root_name, str(new_identifier), label='1')
             G.add_edge(edge)
 
+G = pydot.Dot(graph_type="digraph")
+G.size = "7.75,10.25"
 
+tree_file_name = input("Type in the file name of the Huffman Tree csv file. "
+                       "Make sure it is in the same directory as tree_visualization.")
+# Example tree
+tree = key_to_tree(tree_file_name)
 
-
-add_nodes_and_edges(G, tree, set(), 0)
+tree_to_svg(G, tree, set(), 0)
 
 im = Image(G.create_svg())
 
