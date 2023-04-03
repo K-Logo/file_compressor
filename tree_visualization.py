@@ -1,3 +1,7 @@
+"""This is the module for visualizing a Huffman Tree.
+
+This file is Copyright (c) 2023 Will Kukkamalla, Alex Lee, Kirill Logoveev, and Brandon Wong.
+"""
 import pydot
 from IPython.display import Image, display
 from tree import HuffmanTree, Node
@@ -88,9 +92,10 @@ G = pydot.Dot(graph_type="digraph")
 G.size = "7.75,10.25"
 
 tree_file_name = input("Type in the file name of the Huffman Tree csv file. "
-                       "Make sure it is in the same directory as tree_visualization.")
+                       "Make sure it is in the same directory as tree_visualization. (Type the file name without"
+                       "the .csv extension)")
 # Example tree
-tree = key_to_tree(tree_file_name)
+tree = key_to_tree(tree_file_name+'.csv')
 
 tree_to_svg(G, tree, set(), 0)
 
@@ -98,4 +103,6 @@ im = Image(G.create_svg())
 
 display(im)
 
-G.write_svg("treegraph.svg")
+G.write_svg('graph.svg')
+
+
