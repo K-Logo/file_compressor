@@ -304,7 +304,7 @@ def decode_input(text: str, key: str) -> str:
     # Creates the tree from the key file
     key_lst = []
     key_csv = pd.read_csv(key)
-    for row in key_csv.iterrows():
+    for i, row in key_csv.iterrows():
         key_lst.append(Node(row["Character"], row["Frequency"]))
 
     # Creates the tree to decode the text
