@@ -255,5 +255,5 @@ if __name__ == "__main__":
         'max-line-length': 120,
         'extra-imports': ['csv', 'typing'],
         'disable': ['unused-import', "too-many-function-args", "forbidden-import", "wildcard-import",
-                    "inconsistent-return-statments"]
+                    "inconsistent-return-statments", "unused-variables"]
     })
