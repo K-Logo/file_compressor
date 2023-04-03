@@ -6,3 +6,9 @@ pytz==2023.2
 setuptools==65.5.1
 six==1.16.0
 wheel==0.38.4
+graphviz==0.20.1
+pydot==1.4.2
+pillow==9.5.0
+reportlab==3.6.12
+svglib==1.5.1
+ipython==8.12.0
