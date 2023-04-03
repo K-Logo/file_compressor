@@ -1,8 +1,11 @@
+"""This file has all the classes for the tree programs.
+
+This file is Copyright (c) 2023 Will Kukkamalla, Alex Lee, Kirill Logoveev, and Brandon Wong.
+"""
 from __future__ import annotations
 from typing import Any, Optional
-import graphviz
 
-# @check_contracts
+
 class Node:
     """
     Class for the Node data type.
@@ -61,27 +64,30 @@ class Node:
         else:
             return ""
 
-    def find_character(self, bit: str) -> str:
+    def find_character(self) -> str:
+        """Returns the character in the stored in the node object."""
         return self.character
 
-# @check_contracts
+
 class HuffmanTree:
     """Contains the code for the huffman tree.
 
     Representation invariants:
         - self._root is Node or self._root is None or isinstance(self._root, int)
+
     """
     # Private Inttance Attributes:
     #    - _root:
     #       The root of the tree.
-    #       It either represents the sum of characters from all of its subtrees or it contains a Node with the character,
-    #       which means it's a leaf.
+    #       It either represents the sum of characters from all of its subtrees or it contains a Node with the
+    #       charactwhich means it's a leaf.
     #   - _left:
     #       The left subtree/node of the tree.
     #       If self._left is a Node object, then it is a leaf.
     #   - _right:
     #       The right subtree/node of the tree.
     #       If self._right is a Node object, then it is a leaf.
+
     _root: Optional[Node] | int
     _left: Optional[Node] | Optional[HuffmanTree]
     _right: Optional[Node] | Optional[HuffmanTree]
@@ -195,12 +201,12 @@ class HuffmanTree:
         else:
             return self._left.find_huffman_value(char, bits + "0") + self._right.find_huffman_value(char, bits + "1")
 
-    def find_character(self, bits: str) -> Optional[str]:
+    def tree_find_character(self, bits: str) -> Optional[str]:
         """Returns the character represented by the set of bits.
 
         >>> tree = HuffmanTree(1)
         >>> tree.add([Node("c", 1), Node("a", 2),Node("b", 8),Node("d", 6),Node("g", 5),])
-        >>> tree.find_character(bits="0011")
+        >>> tree.tree_find_character(bits="0011")
         'c'
         """
         if self._left is None and self._right is None:
@@ -209,18 +215,27 @@ class HuffmanTree:
             return None
         elif bits[0] == '1':
             bits = bits[1:]
-            return self._right.find_character(bits)
+            if isinstance(self._right, Node):
+                return self._right.find_character()
+            else:
+                return self._right.tree_find_character(bits)
         elif bits[0] == "0":
             bits = bits[1:]
-            return self._left.find_character(bits)
+            if isinstance(self._left, Node):
+                return self._left.find_character()
+            else:
+                return self._left.tree_find_character(bits)
+        else:
+            return None
 
     def get_root_frequency(self) -> int:
+        "Returns the integer stored in the root node of the tree"
         if isinstance(self._root, int):
             return self._root
         else:
             return self._root.frequency
 
-# @check_contracts
+
 def get_min(lst: list[tuple]) -> tuple:
     """Returns the tuple with the smallest first element.
 
@@ -232,3 +247,13 @@ def get_min(lst: list[tuple]) -> tuple:
         if i[0] <= min_so_far[0]:
             min_so_far = i
     return min_so_far
+
+
+if __name__ == "__main__":
+    import python_ta
+    python_ta.check_all(config={
+        'max-line-length': 120,
+        'extra-imports': ['csv', 'typing'],
+        'disable': ['unused-import', "too-many-function-args", "forbidden-import", "wildcard-import",
+                    "inconsistent-return-statments", "unused_variables"]
+    })
