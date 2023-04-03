@@ -387,9 +387,7 @@ if __name__ == '__main__':
     # creating new tabs
     tab_control = ttk.Notebook(root)
     tab1 = Frame(tab_control)
-    tab2 = Frame(tab_control)
     tab_control.add(tab1, text='Encode or Decode')
-    tab_control.add(tab2, text='Tree Visualization')
     tab_control.pack(expand=1, fill='both')
 
     new_label = Label(tab1, text='Please select an option')
